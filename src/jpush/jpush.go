@@ -116,7 +116,7 @@ type Notification struct {
     NBuilderId uint                   `json:"n_builder_id"` // 可选
     NTitle     string                 `json:"n_title"`      // 可选
     NContent   string                 `json:"n_content"`
-    NExtra     map[string]interface{} `json:"n_extra"`      // 可选
+    NExtras    map[string]interface{} `json:"n_extras"`     // 可选
 } // Notification
 
 func (noti *Notification) MarshalJSON() ([]byte, error) {
@@ -128,8 +128,8 @@ func (noti *Notification) MarshalJSON() ([]byte, error) {
     if noti.NTitle != "" {
         tmp["n_title"] = noti.NTitle
     }
-    if noti.NExtra != nil {
-        tmp["n_extra"] = noti.NExtra
+    if noti.NExtras != nil {
+        tmp["n_extras"] = noti.NExtras
     }
 
     buf := new(bytes.Buffer)
@@ -144,7 +144,7 @@ type UserDefinedMessage struct {
     ContentType interface{}             `json:"content_type"`
     Title       string                  `json:"title"`
     Message     string                  `json:"message"`
-    Extra       map[string]interface{}  `json:"extra"`
+    Extras      map[string]interface{}  `json:"extras"`
 } // UserDefinedMessage
 
 func (msg *UserDefinedMessage) MarshalJSON() ([]byte, error) {
@@ -158,8 +158,8 @@ func (msg *UserDefinedMessage) MarshalJSON() ([]byte, error) {
     if msg.Title != "" {
         tmp["title"] = msg.Title
     }
-    if msg.Extra != nil {
-        tmp["extra"] = msg.Extra
+    if msg.Extras != nil {
+        tmp["extras"] = msg.Extras
     }
 
     buf := new(bytes.Buffer)
