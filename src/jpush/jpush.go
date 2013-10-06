@@ -1,6 +1,7 @@
 package jpush
 
 import (
+    "bytes"
     "fmt"
     "strings"
     "crypto/md5"
@@ -110,3 +111,61 @@ func (pr *Pusher) Push(ret *PushRet, p *Push) (err error) {
     }
     return
 } // Push
+
+type Notification struct {
+    NBuilderId uint                   `json:"n_builder_id"` // 可选
+    NTitle     string                 `json:"n_title"`      // 可选
+    NContent   string                 `json:"n_content"`
+    NExtra     map[string]interface{} `json:"n_extra"`      // 可选
+} // Notification
+
+func (noti *Notification) MarshalJSON() ([]byte, error) {
+    tmp := map[string]interface{}{}
+
+    tmp["n_builder_id"] = noti.NBuilderId
+    tmp["n_content"] = noti.NContent
+
+    if noti.NTitle != "" {
+        tmp["n_title"] = noti.NTitle
+    }
+    if noti.NExtra != nil {
+        tmp["n_extra"] = noti.NExtra
+    }
+
+    buf := new(bytes.Buffer)
+    err := json.NewEncoder(buf).Encode(&tmp)
+    if err != nil {
+        return nil, err
+    }
+    return buf.Bytes(), nil
+} // MarshalJSON
+
+type UserDefinedMessage struct {
+    ContentType interface{}             `json:"content_type"`
+    Title       string                  `json:"title"`
+    Message     string                  `json:"message"`
+    Extra       map[string]interface{}  `json:"extra"`
+} // UserDefinedMessage
+
+func (msg *UserDefinedMessage) MarshalJSON() ([]byte, error) {
+    tmp := map[string]interface{}{}
+
+    tmp["message"] = msg.Message
+
+    if msg.ContentType != nil {
+        tmp["content_type"] = msg.ContentType
+    }
+    if msg.Title != "" {
+        tmp["title"] = msg.Title
+    }
+    if msg.Extra != nil {
+        tmp["extra"] = msg.Extra
+    }
+
+    buf := new(bytes.Buffer)
+    err := json.NewEncoder(buf).Encode(&tmp)
+    if err != nil {
+        return nil, err
+    }
+    return buf.Bytes(), nil
+} // MarshalJSON
