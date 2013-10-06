@@ -38,16 +38,16 @@ const (
 )
 
 type Push struct {
-    sendNo          uint32
-    receiverType    string
-    receiverValue   []string
-    msgType         string
-    msgContent      string
-    sendDescription string      // 关于本消息的描述，不会发送给接收者
-    platform        []string    // 端手机的平台类型，如：android，ios，使用逗号分隔
-    timeToLive      uint        // 离线保存时间，单位：秒，最长为10天（864000秒）
+    SendNo          uint32
+    ReceiverType    string
+    ReceiverValue   []string
+    MsgType         string
+    MsgContent      string
+    SendDescription string      // 关于本消息的描述，不会发送给接收者
+    Platform        []string    // 端手机的平台类型，如：android，ios，使用逗号分隔
+    TimeToLive      uint        // 离线保存时间，单位：秒，最长为10天（864000秒）
                                 // 0 表示该消息不保存离线，即：用户在线马上发出，当前不在线用户将不会收到此消息
-    overrideMsgId   string      // 待覆盖的上一条消息的ID
+    OverrideMsgId   string      // 待覆盖的上一条消息的ID
 } // Push
 
 type PushRet struct {
@@ -59,42 +59,42 @@ type PushRet struct {
 func (pr *Pusher) Push(ret *PushRet, p *Push) (err error) {
     kvs := url.Values{}
 
-    kvs.Add("sendno", fmt.Sprintf("%d", p.sendNo))
+    kvs.Add("sendno", fmt.Sprintf("%d", p.SendNo))
     kvs.Add("app_key", pr.appKey)
-    kvs.Add("receiver_type", p.receiverType)
+    kvs.Add("receiver_type", p.ReceiverType)
 
     receiverValue := ""
-    if p.receiverType == RECV_BY_TAG || p.receiverType == RECV_BY_ALIAS {
-        receiverValue = strings.Join(p.receiverValue, ",")
+    if p.ReceiverType == RECV_BY_TAG || p.ReceiverType == RECV_BY_ALIAS {
+        receiverValue = strings.Join(p.ReceiverValue, ",")
         kvs.Add("receiver_value", receiverValue)
     }
 
     {
-        msg := fmt.Sprintf("%d", p.sendNo) + p.receiverType + receiverValue + pr.masterSecret
+        msg := fmt.Sprintf("%d", p.SendNo) + p.ReceiverType + receiverValue + pr.masterSecret
 
-        var tmp [20]byte
+        var tmp [16]byte
         md5er := md5.New()
         _, err = md5er.Write([]byte(msg))
         if err != nil {
             return
         }
 
-        md5Val := md5er.Sum(tmp[:])
-        kvs.Add("verification_code", fmt.Sprintf("%x", md5Val))
+        md5Val := md5er.Sum(tmp[:0])
+        kvs.Add("verification_code", fmt.Sprintf("%x", md5Val[:]))
     }
 
-    kvs.Add("msg_type", p.msgType)
-    kvs.Add("msg_content", p.msgContent)
+    kvs.Add("msg_type", p.MsgType)
+    kvs.Add("msg_content", p.MsgContent)
 
-    if p.sendDescription != "" {
-        kvs.Add("send_description", p.sendDescription)
+    if p.SendDescription != "" {
+        kvs.Add("send_description", p.SendDescription)
     }
 
-    kvs.Add("platform", strings.Join(p.platform, ","))
-    kvs.Add("time_to_live", fmt.Sprintf("%d", p.timeToLive))
+    kvs.Add("platform", strings.Join(p.Platform, ","))
+    kvs.Add("time_to_live", fmt.Sprintf("%d", p.TimeToLive))
 
-    if p.overrideMsgId != "" {
-        kvs.Add("override_msg_id", p.overrideMsgId)
+    if p.OverrideMsgId != "" {
+        kvs.Add("override_msg_id", p.OverrideMsgId)
     }
 
     body := kvs.Encode()
